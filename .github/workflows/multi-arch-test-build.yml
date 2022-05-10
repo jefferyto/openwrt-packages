@@ -87,7 +87,7 @@ jobs:
           echo "PACKAGES=$PACKAGES" >> $GITHUB_ENV
 
       - name: Build
-        uses: openwrt/gh-action-sdk@v4
+        uses: jefferyto/openwrt-gh-action-sdk@not-root
         env:
           ARCH: ${{ matrix.arch }}-${{ env.BRANCH }}
           FEEDNAME: packages_ci
