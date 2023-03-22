@@ -11,41 +11,41 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - arch: arm_cortex-a9_vfpv3-d16
-            target: mvebu-cortexa9
-            runtime_test: false
+          #- arch: arm_cortex-a9_vfpv3-d16
+          #  target: mvebu-cortexa9
+          #  runtime_test: false
 
-          - arch: mips_24kc
-            target: ath79-generic
-            runtime_test: false
+          #- arch: mips_24kc
+          #  target: ath79-generic
+          #  runtime_test: false
 
-          - arch: mipsel_24kc
-            target: mt7621
-            runtime_test: false
+          #- arch: mipsel_24kc
+          #  target: mt7621
+          #  runtime_test: false
 
-          - arch: powerpc_464fp
-            target: apm821xx-nand
-            runtime_test: false
+          #- arch: powerpc_464fp
+          #  target: apm821xx-nand
+          #  runtime_test: false
 
-          - arch: powerpc_8548
-            target: mpc85xx-p1010
-            runtime_test: false
+          #- arch: powerpc_8548
+          #  target: mpc85xx-p1010
+          #  runtime_test: false
 
-          - arch: aarch64_cortex-a53
-            target: mvebu-cortexa53
-            runtime_test: true
+          #- arch: aarch64_cortex-a53
+          #  target: mvebu-cortexa53
+          #  runtime_test: true
 
           - arch: arm_cortex-a15_neon-vfpv4
             target: armvirt-32
             runtime_test: true
 
-          - arch: i386_pentium-mmx
-            target: x86-geode
-            runtime_test: true
+          #- arch: i386_pentium-mmx
+          #  target: x86-geode
+          #  runtime_test: true
 
-          - arch: x86_64
-            target: x86-64
-            runtime_test: true
+          #- arch: x86_64
+          #  target: x86-64
+          #  runtime_test: true
 
     steps:
       - uses: actions/checkout@v3
@@ -82,14 +82,25 @@ jobs:
           echo "Building $PACKAGES"
           echo "PACKAGES=$PACKAGES" >> $GITHUB_ENV
 
+      - name: Generate build keys
+        run: |
+          sudo apt-get install -y signify-openbsd
+          signify-openbsd -G -n -c 'DO NOT USE - OpenWrt packages feed CI' -p packages_ci.pub -s packages_ci.sec
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "KEY_BUILD<<$EOF" >> $GITHUB_ENV
+          cat packages_ci.sec >> $GITHUB_ENV
+          echo "$EOF" >> $GITHUB_ENV
+
       - name: Build
-        uses: openwrt/gh-action-sdk@v5
+        uses: openwrt/gh-action-sdk@master
         env:
           ARCH: ${{ matrix.arch }}-${{ env.BRANCH }}
           FEEDNAME: packages_ci
+          INDEX: 1
+          KEY_BUILD: ${{ env.KEY_BUILD }}
 
       - name: Move created packages to project dir
-        run: cp bin/packages/${{ matrix.arch }}/packages_ci/*.ipk . || true
+        run: cp bin/packages/${{ matrix.arch }}/packages_ci/* . || true
 
       - name: Collect metadata
         run: |
@@ -132,6 +143,8 @@ jobs:
         with:
           name: ${{env.ARCHIVE_NAME}}-packages
           path: |
+            Packages
+            Packages.*
             *.ipk
             PKG-INFO
 

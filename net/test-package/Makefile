@@ -7,23 +7,24 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=obfs4proxy
-PKG_VERSION:=0.0.13
+PKG_NAME:=test-package
+PKG_VERSION:=0.0.1
 PKG_RELEASE:=1
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/obfs4proxy
+define Package/test-package
   SECTION:=net
   CATEGORY:=Network
   TITLE:=A Tor pluggable transport proxy, implementing obfs4
   URL:=https://gitlab.com/yawning/obfs4
+  DEPENDS:=+obfs4proxy
 endef
 
 Build/Compile:=:
 
-define Package/obfs4proxy/install
-	touch $(1)/obfs
+define Package/test-package/install
+	touch $(1)/test-package
 endef
 
-$(eval $(call BuildPackage,obfs4proxy))
+$(eval $(call BuildPackage,test-package))
