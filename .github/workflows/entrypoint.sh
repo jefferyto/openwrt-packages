@@ -2,7 +2,13 @@
 
 # not enabling `errtrace` and `pipefail` since those are bash specific
 set -o errexit # failing commands causes script to fail
-set -o nounset # undefined variables causes script to fail 
+set -o nounset # undefined variables causes script to fail
+
+FINGERPRINT="$(usign -F -p /ci/packages_ci.pub)"
+cp /ci/packages_ci.pub "/etc/opkg/keys/$FINGERPRINT"
+
+# insert ahead of all other feeds
+sed -i -e '1isrc/gz packages_ci file:///ci' /etc/opkg/distfeeds.conf
 
 mkdir -p /var/lock/
 
@@ -11,7 +17,7 @@ opkg update
 [ -n "${CI_HELPER:=''}" ] || CI_HELPER="/ci/.github/workflows/ci_helpers.sh"
 
 for PKG in /ci/*.ipk; do
-	tar -xzOf "$PKG" ./control.tar.gz | tar xzf - ./control 
+	tar -xzOf "$PKG" ./control.tar.gz | tar xzf - ./control
 	# package name including variant
 	PKG_NAME=$(sed -ne 's#^Package: \(.*\)$#\1#p' ./control)
 	# package version without release
@@ -39,5 +45,5 @@ for PKG in /ci/*.ipk; do
 		echo "No test.sh script available"
 	fi
 
-	opkg remove "$PKG_NAME" --force-removal-of-dependent-packages --force-remove
+	opkg remove "$PKG_NAME" --force-removal-of-dependent-packages --force-remove --autoremove || true
 done
