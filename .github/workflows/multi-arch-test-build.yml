@@ -84,6 +84,10 @@ jobs:
           cat packages_ci.sec >> $GITHUB_ENV
           echo "$EOF" >> $GITHUB_ENV
 
+      - name: Show disk usage before build
+        run: |
+          df -h
+
       - name: Build
         uses: jefferyto/openwrt-gh-action-sdk@no-j1
         env:
@@ -91,6 +95,10 @@ jobs:
           FEEDNAME: packages_ci
           INDEX: 1
           KEY_BUILD: ${{ env.KEY_BUILD }}
+
+      - name: Show disk usage after build
+        run: |
+          df -h
 
       - name: Move created packages to project dir
         if: always()
