@@ -15,8 +15,28 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - arch: aarch64_generic
+            target: armsr-armv8
+            runtime_test: false
+
+          - arch: arm_cortex-a15_neon-vfpv4
+            target: armsr-armv7
+            runtime_test: false
+
           - arch: riscv64_riscv64
             target: sifiveu-generic
+            runtime_test: false
+
+          - arch: i386_pentium-mmx
+            target: x86-geode
+            runtime_test: false
+
+          - arch: mips_24kc
+            target: ath79-generic
+            runtime_test: false
+
+          - arch: x86_64
+            target: x86-64
             runtime_test: false
 
     steps:
