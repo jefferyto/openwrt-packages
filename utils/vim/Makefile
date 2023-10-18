@@ -195,6 +195,7 @@ define Build/Compile/vim-runtime
 endef
 
 define Build/Compile
+	false
 $(call Build/Compile/vim)
 $(call Build/Compile/vim-full)
 $(call Build/Compile/vim-fuller)
